@@ -1,0 +1,1 @@
+Shiner Scents updated website — distinct original photos for Harvest Spice, Fall Into Calm and Spoiled & Sweet. Open index.html in a browser. Existing product and shipping checkout remain a prototype; verify final sizes, labels and payment integration before launch.
