@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f4f1">
+  <title>Product Studio · Shiner Scents</title>
+  <link rel="stylesheet" href="/admin/admin.css">
+  <script src="/admin/admin.js" defer></script>
+</head>
+<body class="admin-page">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand brand-dark" href="/" aria-label="Shiner Scents home">
+        <span class="brand-script">Shiner Scents</span>
+        <span class="brand-subtitle">COLLECTION BY SOLOSHINER</span>
+      </a>
+      <p class="sidebar-label">YOUR STUDIO</p>
+      <nav class="side-nav" aria-label="Admin navigation">
+        <a class="nav-item active" href="/admin"><span class="nav-icon" aria-hidden="true">✦</span> Products</a>
+        <a class="nav-item" href="/" target="_blank" rel="noopener"><span class="nav-icon" aria-hidden="true">↗</span> View storefront</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="maker-note"><span class="maker-note-icon">✧</span><p><strong>Made by hand.</strong><br>Managed with love.</p></div>
+        <button id="sign-out" class="signout-button"><span aria-hidden="true">↪</span> Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-script">Shiner Scents</span></div>
+        <div class="topbar-right"><span id="admin-email" class="admin-email"></span><span class="avatar" aria-hidden="true">S</span><button id="sign-out-mobile" class="mobile-signout">Sign out</button></div>
+      </header>
+
+      <section class="welcome-row">
+        <div>
+          <p class="eyebrow">YOUR PRODUCT STUDIO</p>
+          <h1>Make it <em>glow.</em></h1>
+          <p class="muted welcome-copy">Add a new favorite or refresh a product in your collection.</p>
+        </div>
+        <button id="add-product" class="button button-primary"><span aria-hidden="true">＋</span> Add product</button>
+      </section>
+
+      <section class="stats-grid" aria-label="Product summary">
+        <article class="stat-card"><span class="stat-icon">✧</span><div><p>All products</p><strong id="total-count">—</strong></div></article>
+        <article class="stat-card"><span class="stat-icon stat-icon-live">●</span><div><p>On your storefront</p><strong id="published-count">—</strong></div></article>
+        <article class="stat-card"><span class="stat-icon stat-icon-draft">◌</span><div><p>Hidden for now</p><strong id="draft-count">—</strong></div></article>
+      </section>
+
+      <section class="collection-panel">
+        <div class="collection-heading">
+          <div><p class="eyebrow">THE COLLECTION</p><h2>Your products</h2></div>
+          <label class="search-box"><span aria-hidden="true">⌕</span><span class="sr-only">Search products</span><input id="search-products" type="search" placeholder="Search products…"></label>
+        </div>
+        <div class="filters" role="group" aria-label="Filter products">
+          <button class="filter-button active" data-filter="all">All <span id="all-filter-count">0</span></button>
+          <button class="filter-button" data-filter="published">Published</button>
+          <button class="filter-button" data-filter="hidden">Hidden</button>
+        </div>
+        <div class="product-list-heading" aria-hidden="true"><span>PRODUCT</span><span>PRICE</span><span>STATUS</span><span></span></div>
+        <div id="product-list" class="product-list" aria-live="polite"></div>
+        <div id="empty-state" class="empty-state" hidden><span class="empty-flower">✿</span><h3>Your collection starts here.</h3><p>Add your first product and it will be ready to share.</p><button class="button button-primary" id="empty-add">Add your first product</button></div>
+      </section>
+      <p class="main-footnote">A good scent makes a moment. Your products make the story.</p>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <template id="product-row-template">
+    <article class="product-row">
+      <img class="product-thumb" data-product-image alt="" loading="lazy">
+      <div class="product-row-details"><strong data-product-name></strong><span data-product-category></span></div>
+      <strong class="product-row-price" data-product-price></strong>
+      <span class="status-pill" data-product-status></span>
+      <div class="row-actions"><button type="button" class="text-action" data-action="edit">Edit</button><button type="button" class="text-action text-action-danger" data-action="delete">Delete</button></div>
+    </article>
+  </template>
+
+  <dialog id="product-editor" class="editor-dialog" aria-labelledby="editor-title">
+    <form id="product-form" class="editor-form" novalidate>
+      <div class="editor-header"><div><p class="eyebrow">YOUR COLLECTION</p><h2 id="editor-title">Add a product</h2><p class="muted">A few details and a lovely photo are all you need.</p></div><button type="button" class="icon-button" id="close-editor" aria-label="Close product editor">×</button></div>
+      <div class="editor-body">
+        <div class="editor-fields">
+          <label class="field-label" for="product-name">Product name</label>
+          <input class="text-field" id="product-name" name="name" type="text" maxlength="120" placeholder="e.g. Harvest Spice" required>
+          <span class="field-error" data-error-for="name"></span>
+
+          <label class="field-label" for="product-description">Description</label>
+          <textarea class="text-field" id="product-description" name="description" rows="4" maxlength="2000" placeholder="Tell customers what makes this product special."></textarea>
+          <span class="field-hint">A short, warm description helps customers picture it in their home.</span>
+          <span class="field-error" data-error-for="description"></span>
+
+          <div class="field-pair">
+            <div><label class="field-label" for="product-category">Category</label><select class="text-field" id="product-category" name="category"><option>Signature Scents</option><option>Body Lovers</option><option>Sip &amp; Glow</option><option>Sculpted Silhouettes</option><option>Seasonal &amp; Gifts</option><option>Other</option></select><span class="field-error" data-error-for="category"></span></div>
+            <div><label class="field-label" for="product-price">Price</label><div class="price-input"><span>$</span><input class="text-field" id="product-price" name="price" type="number" min="0.01" step="0.01" placeholder="24.00" required></div><span class="field-error" data-error-for="price"></span></div>
+          </div>
+
+          <div class="photo-field"><label class="field-label" for="product-image">Product photo</label><label class="upload-box" for="product-image"><span class="upload-icon">↑</span><strong id="upload-label">Upload a photo</strong><span>Choose a clear, bright product image</span><small>JPEG, PNG, or WebP · up to 8 MiB</small><input id="product-image" name="image" type="file" accept="image/jpeg,image/png,image/webp"></label><img id="photo-preview" class="photo-preview" alt="Current product photo" hidden><span class="field-error" data-error-for="image"></span></div>
+
+          <div class="toggle-row"><div><strong>Available to order</strong><span>Customers can inquire about this product.</span></div><label class="switch"><input id="product-available" name="isAvailable" type="checkbox" checked><span class="switch-track"></span><span class="sr-only">Available to order</span></label></div>
+          <div class="toggle-row"><div><strong>Publish on storefront</strong><span>Published products appear in the shop.</span></div><label class="switch"><input id="product-published" name="isPublished" type="checkbox"><span class="switch-track"></span><span class="sr-only">Show on storefront</span></label></div>
+          <p id="editor-error" class="form-error" role="alert" hidden></p>
+        </div>
+      </div>
+      <div class="editor-footer"><button type="button" class="button button-soft" id="cancel-editor">Cancel</button><button type="submit" class="button button-primary" id="save-product">Save product</button></div>
+    </form>
+  </dialog>
+</body>
+</html>

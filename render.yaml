@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: shiner-scents
+    runtime: node
+    plan: 0.5c-512mb
+    region: ohio
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    disk:
+      name: shiner-scents-images
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shiner-scents-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+
+databases:
+  - name: shiner-scents-db
+    plan: 0.1c-256mb
+    region: ohio
+    databaseName: shiner_scents
+    user: shiner_scents
+    diskSizeGB: 1
