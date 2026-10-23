@@ -16,10 +16,10 @@ Products marked **Published** appear in the public shop. Hidden products remain 
 
 ## One-time Render setup
 
-This setup creates a Render Node web service, a Render PostgreSQL database, and a persistent disk for uploaded product photos. The disk requires a paid Render web-service plan. The service and database are in the same Render region. The upload disk is configured for one service instance; Render does not allow a disk-backed service to scale to multiple instances. Deploys that use a persistent disk can have a short interruption while Render replaces the instance. See [Render persistent disk details](https://render.com/docs/disks).
+This lower-cost setup creates one small Render Node web service and a 1 GB persistent disk. SQLite stores products, the admin account, and login sessions on that disk; uploaded product photos use the same disk. This avoids a separate PostgreSQL charge while keeping the catalog and photos across restarts and deploys. Render's current estimate is about $7.25/month ($7 service + $0.25 for 1 GB disk), before usage-based charges. Persistent disks require a paid web-service plan, support one service instance, and cause a short interruption during deploys. See [Render persistent disk details](https://render.com/docs/disks).
 
 1. Put the contents of this project folder in the GitHub repository that Render should deploy. Keep `render.yaml` at the repository root.
-2. In Render, create a new Blueprint and connect that repository. Render will show the web service, database, and disk it is about to provision. Review the plan before deploying.
+2. In Render, create a new Blueprint and connect that repository. Render will show the web service and disk it is about to provision. Review the plan before deploying.
 3. Enter the initial admin email and a strong password when Render asks for `ADMIN_EMAIL` and `ADMIN_PASSWORD`. These values are private Render settings and are never stored in this source file. Render generates the session secret automatically.
 4. Wait for the service's `/healthz` check to pass. Open the service URL and confirm the storefront loads; then open `/admin/login` and sign in with the credentials from step 3.
 
@@ -30,10 +30,10 @@ If the current Render website is a Static Site, this Blueprint creates a separat
 ## Local checks
 
 - `npm ci` installs the locked dependencies.
-- `npm test` runs the unit and integration tests with a PostgreSQL-compatible in-memory test database.
+- `npm test` runs the unit and integration tests with in-memory SQLite.
 - `npm run check` checks JavaScript syntax.
 - `npm run render:check` validates the Render Blueprint before provisioning.
 
-For local development, copy `.env.example` to `.env`, set a PostgreSQL `DATABASE_URL`, and replace the sample session/admin values. Do not commit `.env` or share the initial admin password in source control.
+For local development, copy `.env.example` to `.env` and replace the sample session/admin values. The app creates the SQLite database at `DATABASE_PATH`; make sure its parent directory exists. Do not commit `.env` or share the initial admin password in source control.
 
-Product records are stored in Render PostgreSQL. Uploaded photos are stored under `/var/data/uploads` on the Render persistent disk, so they survive restarts and deploys. Keep the disk attached and retain its snapshots when managing the service. Render snapshots persistent disks daily; its [disk guide](https://render.com/docs/disks) explains the limits and restore behavior.
+Product records, admin login, and sessions are stored in `/var/data/shiner-scents.sqlite`; uploaded photos are stored under `/var/data/uploads`. Both survive restarts and deploys while the persistent disk stays attached. Keep the disk attached and retain its snapshots when managing the service. Render snapshots persistent disks daily; its [disk guide](https://render.com/docs/disks) explains the limits and restore behavior.

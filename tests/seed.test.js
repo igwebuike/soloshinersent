@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { newDb } from 'pg-mem';
+import { createSqliteDatabase } from '../src/db/pool.js';
 
 const { runMigrations } = await import('../src/db/migrate.js').catch(() => ({}));
 const { seedInitialProducts } = await import('../src/db/seed.js').catch(() => ({}));
@@ -8,9 +8,7 @@ const { seedInitialProducts } = await import('../src/db/seed.js').catch(() => ({
 test('database migration and initial seed create the six current storefront products once', async () => {
   assert.equal(typeof runMigrations, 'function');
   assert.equal(typeof seedInitialProducts, 'function');
-  const memoryDb = newDb();
-  const { Pool } = memoryDb.adapters.createPg();
-  const pool = new Pool();
+  const pool = createSqliteDatabase();
 
   await runMigrations(pool);
   await seedInitialProducts(pool);

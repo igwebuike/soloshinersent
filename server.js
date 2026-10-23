@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { mkdir } from 'node:fs/promises';
+import path from 'node:path';
 import { loadConfig } from './src/config.js';
 import { getPool } from './src/db/pool.js';
 import { runMigrations } from './src/db/migrate.js';
@@ -8,6 +9,7 @@ import { ensureInitialAdmin } from './src/auth/bootstrap.js';
 import { createApp } from './src/app.js';
 
 const config = loadConfig();
+await mkdir(path.dirname(config.databasePath), { recursive: true });
 await mkdir(config.uploadDir, { recursive: true });
 const pool = getPool(config);
 try {

@@ -5,7 +5,7 @@ import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import request from 'supertest';
-import { newDb } from 'pg-mem';
+import { createSqliteDatabase } from '../src/db/pool.js';
 import test from 'node:test';
 
 const validationModule = await import('../src/products/validation.js').catch(() => ({}));
@@ -18,9 +18,7 @@ const { createAuthRouter } = await import('../src/auth/routes.js');
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jXioAAAAASUVORK5CYII=', 'base64');
 
 async function makePool() {
-  const memoryDb = newDb();
-  const { Pool } = memoryDb.adapters.createPg();
-  const pool = new Pool();
+  const pool = createSqliteDatabase();
   await runMigrations(pool);
   return pool;
 }

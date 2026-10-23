@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { JSDOM } from 'jsdom';
 import request from 'supertest';
-import { newDb } from 'pg-mem';
+import { createSqliteDatabase } from '../src/db/pool.js';
 import test from 'node:test';
 import expressSession from 'express-session';
 
@@ -23,9 +23,7 @@ const sampleProducts = [{
 }];
 
 async function makeApp() {
-  const memoryDb = newDb();
-  const { Pool } = memoryDb.adapters.createPg();
-  const pool = new Pool();
+  const pool = createSqliteDatabase();
   await runMigrations(pool);
   const uploadDir = await mkdtemp(path.join(os.tmpdir(), 'shiner-storefront-'));
   const app = createApp({

@@ -4,7 +4,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import request from 'supertest';
-import { newDb } from 'pg-mem';
+import { createSqliteDatabase } from '../src/db/pool.js';
 import { JSDOM } from 'jsdom';
 import test from 'node:test';
 
@@ -13,9 +13,7 @@ const { runMigrations } = await import('../src/db/migrate.js');
 const { ensureInitialAdmin } = await import('../src/auth/bootstrap.js');
 
 async function setup() {
-  const memoryDb = newDb();
-  const { Pool } = memoryDb.adapters.createPg();
-  const pool = new Pool();
+  const pool = createSqliteDatabase();
   await runMigrations(pool);
   await ensureInitialAdmin(pool, {
     adminEmail: 'serrell@example.com', adminPassword: 'Serrell-good-password-2026!',

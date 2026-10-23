@@ -1,15 +1,8 @@
 import session from 'express-session';
-import connectPgSimple from 'connect-pg-simple';
-
-const PgStore = connectPgSimple(session);
+import { SqliteSessionStore } from './sqlite-session-store.js';
 
 export function createSessionMiddleware({ pool, config, store } = {}) {
-  const sessionStore = store || new PgStore({
-    pool,
-    tableName: 'user_sessions',
-    createTableIfMissing: true,
-    pruneSessionInterval: 60 * 15,
-  });
+  const sessionStore = store || new SqliteSessionStore(pool.database);
 
   return session({
     name: 'shiner.sid',

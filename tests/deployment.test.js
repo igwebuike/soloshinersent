@@ -6,14 +6,14 @@ import expressSession from 'express-session';
 import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { newDb } from 'pg-mem';
+import { createSqliteDatabase } from '../src/db/pool.js';
 import { runMigrations } from '../src/db/migrate.js';
 const { createApp } = await import('../src/app.js');
 
 const { validateRenderBlueprint } = await import('../scripts/validate-render-config.js').catch(() => ({}));
 const renderYaml = await readFile(new URL('../render.yaml', import.meta.url), 'utf8').catch(() => '');
 
-test('Render Blueprint wires a persistent-disk Node service to Render PostgreSQL', () => {
+test('Render Blueprint uses the persistent disk for SQLite data and uploaded photos', () => {
   assert.equal(typeof validateRenderBlueprint, 'function');
   const blueprint = validateRenderBlueprint(renderYaml);
   const service = blueprint.services[0];
@@ -21,10 +21,8 @@ test('Render Blueprint wires a persistent-disk Node service to Render PostgreSQL
   assert.equal(service.runtime, 'node');
   assert.equal(service.healthCheckPath, '/healthz');
   assert.equal(service.disk.mountPath, '/var/data');
-  const database = blueprint.databases.find(item => item.name === 'shiner-scents-db');
-  assert.ok(database);
   const env = Object.fromEntries(service.envVars.map(item => [item.key, item]));
-  assert.equal(env.DATABASE_URL.fromDatabase.name, database.name);
+  assert.equal(env.DATABASE_PATH.value, '/var/data/shiner-scents.sqlite');
   assert.equal(env.UPLOAD_DIR.value, '/var/data/uploads');
 });
 
@@ -45,9 +43,7 @@ test('Render Blueprint validator rejects a service without persistent image stor
 
 
 test('local HTTP smoke test serves health, storefront, public client, and login routes', async () => {
-  const memoryDb = newDb();
-  const { Pool } = memoryDb.adapters.createPg();
-  const pool = new Pool();
+  const pool = createSqliteDatabase();
   await runMigrations(pool);
   const uploadDir = await mkdtemp(path.join(os.tmpdir(), 'shiner-smoke-'));
   const app = createApp({

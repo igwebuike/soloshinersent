@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import express from 'express';
 import session from 'express-session';
 import request from 'supertest';
-import { newDb } from 'pg-mem';
+import { createSqliteDatabase } from '../src/db/pool.js';
 import test from 'node:test';
 
 const passwordModule = await import('../src/auth/passwords.js').catch(() => ({}));
@@ -13,9 +13,7 @@ const middlewareModule = await import('../src/auth/require-admin.js').catch(() =
 const { runMigrations } = await import('../src/db/migrate.js');
 
 async function makePool() {
-  const memoryDb = newDb();
-  const { Pool } = memoryDb.adapters.createPg();
-  const pool = new Pool();
+  const pool = createSqliteDatabase();
   await runMigrations(pool);
   return pool;
 }
